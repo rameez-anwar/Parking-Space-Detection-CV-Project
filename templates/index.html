@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1a202c;
+            line-height: 1.5;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 16px 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
+            letter-spacing: -0.025em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+            transform: translateY(-1px);
+        }
+
+        .parking-lot-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .parking-lot-selector label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .lot-select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            color: #2d3748;
+            min-width: 200px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .lot-select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .lot-select:hover {
+            border-color: #cbd5e0;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #48bb78;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            height: calc(100vh - 80px);
+            overflow: hidden;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .video-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            background: rgba(248, 250, 252, 0.8);
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #2d3748;
+        }
+
+        .panel-indicator {
+            width: 6px;
+            height: 6px;
+            background: #48bb78;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .video-container {
+            flex: 1;
+            position: relative;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+        }
+
+        .video-feed {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .placeholder-icon {
+            width: 48px;
+            height: 48px;
+            background: #2d3748;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .placeholder-icon::before {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 12px solid #a0aec0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            margin-left: 3px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            min-height: 320px;
+        }
+
+        .stats-header {
+            background: rgba(248, 250, 252, 0.8);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+            text-align: center;
+        }
+
+        .stats-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 2px;
+        }
+
+        .stats-subtitle {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: rgba(226, 232, 240, 0.3);
+            flex: 0 0 auto;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(248, 250, 252, 1);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .total .stat-value { color: #3182ce; }
+        .empty .stat-value { color: #38a169; }
+        .occupied .stat-value { color: #e53e3e; }
+        .availability .stat-value { color: #d69e2e; }
+
+
+
+        .regions-panel {
+            flex: 0 0 auto;
+            min-height: 0;
+            max-height: 250px;
+        }
+
+
+
+        .regions-panel .stats-header {
+            padding: 10px 16px;
+        }
+
+        .regions-panel .stats-header h2 {
+            font-size: 15px;
+            margin-bottom: 0;
+        }
+
+        .regions-panel .stats-subtitle {
+            display: none;
+        }
+
+        .regions-content {
+            padding: 12px 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .region-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: rgba(248, 250, 252, 0.6);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .region-item:hover {
+            background: rgba(237, 242, 247, 0.8);
+            transform: translateX(2px);
+        }
+
+        .region-name {
+            font-size: 12px;
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .region-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-empty {
+            background: rgba(56, 161, 105, 0.1);
+            color: #38a169;
+            border: 1px solid rgba(56, 161, 105, 0.2);
+        }
+
+        .badge-occupied {
+            background: rgba(229, 62, 62, 0.1);
+            color: #e53e3e;
+            border: 1px solid rgba(229, 62, 62, 0.2);
+        }
+
+        .last-update {
+            text-align: center;
+            padding: 16px;
+            background: rgba(66, 153, 225, 0.1);
+            border-top: 2px solid rgba(66, 153, 225, 0.3);
+            font-size: 14px;
+            color: #1a202c;
+            font-weight: 700;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            overflow: visible;
+            flex: 0 0 auto;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(160, 174, 192, 0.2);
+            border-top: 2px solid #4299e1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr 350px;
+                gap: 20px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                height: 100vh;
+            }
+            
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 16px;
+                height: calc(100vh - 60px);
+            }
+            
+            .video-grid {
+                grid-template-columns: 1fr;
+                height: 60vh;
+            }
+            
+            .sidebar {
+                height: 40vh;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Custom Scrollbar */
+        .regions-content::-webkit-scrollbar,
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .regions-content::-webkit-scrollbar-track,
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .regions-content::-webkit-scrollbar-thumb,
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(160, 174, 192, 0.4);
+            border-radius: 2px;
+        }
+
+        .regions-content::-webkit-scrollbar-thumb:hover,
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(160, 174, 192, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="header-content">
+                <h1>AI Parking System</h1>
+                <div class="header-actions">
+                    <div class="parking-lot-selector">
+                        <label for="parkingLotSelect">Select Parking Lot:</label>
+                        <select id="parkingLotSelect" class="lot-select">
+                            <option value="all">All Parking Lots</option>
+                        </select>
+                    </div>
+                    <a href="/admin/login" class="btn btn-secondary">Admin Login</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="video-grid">
+                <div class="video-panel">
+                    <div class="panel-header">
+                        <span class="panel-title" id="liveCameraTitle">Live Camera Feed</span>
+                        <div class="panel-indicator"></div>
+                    </div>
+                    <div class="video-container" id="liveVideoContainer">
+                        <div class="video-placeholder">
+                            <div class="placeholder-icon"></div>
+                            <span>Connecting to camera...</span>
+                        </div>
+                        <img id="liveImage" class="video-feed" style="display: none;" alt="Live camera feed">
+                    </div>
+                </div>
+
+                <div class="video-panel">
+                    <div class="panel-header">
+                        <span class="panel-title" id="detectionTitle">Detection Analysis</span>
+                        <div class="panel-indicator"></div>
+                    </div>
+                    <div class="video-container" id="processedVideoContainer">
+                        <div class="video-placeholder">
+                            <div class="placeholder-icon"></div>
+                            <span>Processing detection...</span>
+                        </div>
+                        <img id="processedImage" class="video-feed" style="display: none;" alt="Detection analysis">
+                    </div>
+                </div>
+            </div>
+
+            <aside class="sidebar">
+                <div class="stats-panel">
+                    <div class="stats-header">
+                        <h2>Live Statistics</h2>
+                        <div class="stats-subtitle">Real-time parking data</div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card total">
+                            <div class="stat-value" id="totalSpaces">0</div>
+                            <div class="stat-label">Total Spaces</div>
+                        </div>
+                        <div class="stat-card empty">
+                            <div class="stat-value" id="emptySpaces">0</div>
+                            <div class="stat-label">Available</div>
+                        </div>
+                        <div class="stat-card occupied">
+                            <div class="stat-value" id="occupiedSpaces">0</div>
+                            <div class="stat-label">Occupied</div>
+                        </div>
+                        <div class="stat-card availability">
+                            <div class="stat-value" id="availabilityRate">0%</div>
+                            <div class="stat-label">Availability</div>
+                        </div>
+                    </div>
+                    <div class="last-update" id="lastUpdate">Initializing system...</div>
+                </div>
+
+
+
+                <div class="stats-panel regions-panel">
+                    <div class="stats-header">
+                        <h2>Zone Status</h2>
+                    </div>
+                    <div class="regions-content" id="regionList">
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100px; color: #a0aec0;">
+                            <div class="loading-spinner"></div>
+                            <span>Loading zone data...</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        // Update statistics
+        function updateStatistics() {
+            const url = `/api/statistics?lot_id=${currentParkingLotId}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalSpaces').textContent = data.total_spaces;
+                    document.getElementById('emptySpaces').textContent = data.empty_spaces;
+                    document.getElementById('occupiedSpaces').textContent = data.filled_spaces;
+                    
+                    // Calculate availability rate
+                    const availabilityRate = data.total_spaces > 0 
+                        ? Math.round((data.empty_spaces / data.total_spaces) * 100) 
+                        : 0;
+                    document.getElementById('availabilityRate').textContent = availabilityRate + '%';
+                    
+                    // Update last update time
+                    const lastUpdate = data.last_update || 'No data available';
+                    if (lastUpdate !== 'No data available') {
+                        const formattedTime = new Date(lastUpdate).toLocaleTimeString();
+                        document.getElementById('lastUpdate').textContent = `Last updated: ${formattedTime}`;
+                    } else {
+                        document.getElementById('lastUpdate').textContent = 'No data available';
+                    }
+                    
+                    // Update region breakdown
+                    updateRegionStatus(data.region_breakdown);
+                })
+                .catch(error => {
+                    console.error('Error fetching statistics:', error);
+                    document.getElementById('lastUpdate').textContent = 'Connection error';
+                });
+        }
+
+        // Update region status
+        function updateRegionStatus(regions) {
+            const regionList = document.getElementById('regionList');
+            
+            if (!regions || Object.keys(regions).length === 0) {
+                regionList.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100px; color: #a0aec0;">
+                        <span>No zone data available</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            for (const [zoneName, status] of Object.entries(regions)) {
+                const isEmpty = status === 1;
+                const statusText = isEmpty ? 'Available' : 'Occupied';
+                const badgeClass = isEmpty ? 'badge-empty' : 'badge-occupied';
+                
+                // Use the zone name as-is (already cleaned by backend)
+                const displayName = zoneName;
+                
+                html += `
+                    <div class="region-item">
+                        <span class="region-name">${displayName}</span>
+                        <span class="region-badge ${badgeClass}">${statusText}</span>
+                    </div>
+                `;
+            }
+            regionList.innerHTML = html;
+        }
+
+        // Update images with smooth loading
+        function updateImages() {
+            const liveImg = document.getElementById('liveImage');
+            const liveContainer = document.getElementById('liveVideoContainer');
+            const livePlaceholder = liveContainer.querySelector('.video-placeholder');
+            
+            const processedImg = document.getElementById('processedImage');
+            const processedContainer = document.getElementById('processedVideoContainer');
+            const processedPlaceholder = processedContainer.querySelector('.video-placeholder');
+            
+            // Use specific parking lot endpoints
+            const liveUrl = `/api/live-image/${currentParkingLotId}`;
+            const processedUrl = `/api/processed-image/${currentParkingLotId}`;
+            
+            // Update live image
+            fetch(liveUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.image) {
+                        liveImg.onload = function() {
+                            livePlaceholder.style.display = 'none';
+                            liveImg.style.display = 'block';
+                        };
+                        liveImg.src = 'data:image/jpeg;base64,' + data.image;
+                    } else {
+                        livePlaceholder.innerHTML = `
+                            <div class="placeholder-icon"></div>
+                            <span>No image available</span>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching live image:', error);
+                    livePlaceholder.innerHTML = `
+                        <div class="placeholder-icon"></div>
+                        <span>Camera connection error</span>
+                    `;
+                });
+
+            // Update processed image
+            fetch(processedUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.image) {
+                        processedImg.onload = function() {
+                            processedPlaceholder.style.display = 'none';
+                            processedImg.style.display = 'block';
+                        };
+                        processedImg.src = 'data:image/jpeg;base64,' + data.image;
+                    } else {
+                        processedPlaceholder.innerHTML = `
+                            <div class="placeholder-icon"></div>
+                            <span>No processed image available</span>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching processed image:', error);
+                    processedPlaceholder.innerHTML = `
+                        <div class="placeholder-icon"></div>
+                        <span>Processing error</span>
+                    `;
+                });
+        }
+
+        let currentParkingLotId = null;
+        let parkingLots = [];
+
+        // Load parking lots
+        async function loadParkingLots() {
+            try {
+                const response = await fetch('/api/parking-lots');
+                if (response.ok) {
+                    parkingLots = await response.json();
+                    updateParkingLotSelector();
+                }
+            } catch (error) {
+                console.error('Error loading parking lots:', error);
+            }
+        }
+
+        // Update parking lot selector dropdown
+        function updateParkingLotSelector() {
+            const select = document.getElementById('parkingLotSelect');
+            select.innerHTML = '';
+            
+            parkingLots.forEach(lot => {
+                if (lot.is_active) {
+                    const option = document.createElement('option');
+                    option.value = lot.id;
+                    option.textContent = lot.name;
+                    select.appendChild(option);
+                }
+            });
+            
+            // Set default selection to first parking lot
+            if (parkingLots.length > 0) {
+                const firstActiveLot = parkingLots.find(lot => lot.is_active);
+                if (firstActiveLot) {
+                    select.value = firstActiveLot.id;
+                    currentParkingLotId = firstActiveLot.id;
+                    onParkingLotChange(); // Update titles and data
+                }
+            }
+        }
+
+        // Handle parking lot selection change
+        function onParkingLotChange() {
+            const select = document.getElementById('parkingLotSelect');
+            currentParkingLotId = select.value;
+            
+            // Update panel titles
+            const selectedLot = parkingLots.find(lot => lot.id == currentParkingLotId);
+            if (selectedLot) {
+                document.getElementById('liveCameraTitle').textContent = `${selectedLot.name} - Live Feed`;
+                document.getElementById('detectionTitle').textContent = `${selectedLot.name} - Detection`;
+            }
+            
+            // Update images and statistics
+            updateImages();
+            updateStatistics();
+        }
+
+        // Initialize application
+        async function initializeApp() {
+            await loadParkingLots();
+            updateStatistics();
+            updateImages();
+            
+            // Add event listener for parking lot selection
+            document.getElementById('parkingLotSelect').addEventListener('change', onParkingLotChange);
+        }
+
+        // Start application
+        initializeApp();
+
+        // Set up regular updates (3 seconds to match backend)
+        setInterval(() => {
+            updateStatistics();
+            updateImages();
+        }, 3000);
+
+        // Add visual feedback for updates
+        setInterval(() => {
+            const indicators = document.querySelectorAll('.panel-indicator');
+            indicators.forEach(indicator => {
+                indicator.style.opacity = indicator.style.opacity === '0.3' ? '1' : '0.3';
+            });
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Parking Management Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .navbar-brand .logo {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Parking Lot Selector */
+        .parking-selector {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e1e5e9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .selector-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .selector-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .parking-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            color: #333;
+            min-width: 250px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .parking-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Left Panel - Camera Feeds */
+        .camera-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .panel-indicator {
+            width: 12px;
+            height: 12px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .camera-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .camera-feed {
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 16/9;
+            min-height: 200px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .camera-feed img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .placeholder-icon {
+            width: 40px;
+            height: 40px;
+            background: #e1e5e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .camera-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Right Panel - Statistics */
+        .stats-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .stat-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .stat-content {
+            padding: 1rem;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .availability-bar {
+            background: #e1e5e9;
+            border-radius: 6px;
+            height: 6px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        .availability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+
+        .availability-text {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .last-update {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 1rem;
+        }
+
+        /* Zone Status */
+        .zone-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .zone-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .zone-item:last-child {
+            border-bottom: none;
+        }
+
+        .zone-name {
+            font-weight: 500;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .zone-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-available {
+            background: #e8f5e8;
+            color: #2d5a2d;
+        }
+
+        .badge-occupied {
+            background: #ffeaea;
+            color: #c33;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .camera-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            
+            .parking-selector {
+                padding: 0.75rem 1rem;
+            }
+            
+            .selector-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .camera-grid {
+                padding: 1rem;
+                gap: 0.75rem;
+            }
+            
+            .camera-feed {
+                min-height: 180px;
+            }
+            
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="logo">🚗</div>
+            AI Parking Management System
+        </div>
+        <div class="navbar-actions">
+            <a href="/admin" class="logout-btn" style="text-decoration: none; margin-right: 1rem;">Admin Panel</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Parking Lot Selector -->
+    <div class="parking-selector">
+        <div class="selector-container">
+            <div class="selector-label">Select Parking Lot:</div>
+            <select id="parkingLotSelect" class="parking-select" onchange="onParkingLotChange()">
+                <option value="">Loading parking lots...</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Left Panel - Camera Feeds -->
+        <div class="camera-panel">
+            <div class="panel-header">
+                <div class="panel-title" id="cameraPanelTitle">Live Camera Feed</div>
+                <div class="panel-indicator"></div>
+            </div>
+            <div class="camera-grid">
+                <div class="camera-feed">
+                    <img id="liveImage" alt="Live Feed">
+                    <div class="video-placeholder" id="livePlaceholder">
+                        <div class="placeholder-icon">📹</div>
+                        <span>Live camera feed</span>
+                    </div>
+                    <div class="camera-label">Live Feed</div>
+                </div>
+                <div class="camera-feed">
+                    <img id="processedImage" alt="Detection Analysis">
+                    <div class="video-placeholder" id="processedPlaceholder">
+                        <div class="placeholder-icon">🔍</div>
+                        <span>Detection analysis</span>
+                    </div>
+                    <div class="camera-label">Detection Analysis</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Statistics -->
+        <div class="stats-panel">
+            <!-- Live Statistics Card -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">Live Statistics</div>
+                    <div class="stat-subtitle">Real-time parking data</div>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalSpaces">0</div>
+                            <div class="stat-label">Total Spaces</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="emptySpaces">0</div>
+                            <div class="stat-label">Available</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="occupiedSpaces">0</div>
+                            <div class="stat-label">Occupied</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="availabilityRate">0%</div>
+                            <div class="stat-label">Availability</div>
+                        </div>
+                    </div>
+                    
+                    <div class="availability-bar">
+                        <div class="availability-fill" id="availabilityBar"></div>
+                    </div>
+                    <div class="availability-text" id="availabilityText">0% Available</div>
+                    
+                    <div class="last-update" id="lastUpdate">Last updated: Loading...</div>
+                </div>
+            </div>
+
+            <!-- Zone Status Card -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">Zone Status</div>
+                    <div class="stat-subtitle">Individual parking zones</div>
+                </div>
+                <div class="stat-content">
+                    <div class="zone-list" id="zoneList">
+                        <div style="text-align: center; color: #999; padding: 2rem;">
+                            No zone data available
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentParkingLotId = null;
+        let parkingLots = [];
+
+        // Load parking lots
+        async function loadParkingLots() {
+            try {
+                const response = await fetch('/api/parking-lots');
+                if (response.ok) {
+                    parkingLots = await response.json();
+                    updateParkingLotSelector();
+                }
+            } catch (error) {
+                console.error('Error loading parking lots:', error);
+            }
+        }
+
+        // Update parking lot selector
+        function updateParkingLotSelector() {
+            const select = document.getElementById('parkingLotSelect');
+            select.innerHTML = '';
+            
+            parkingLots.forEach(lot => {
+                if (lot.is_active) {
+                    const option = document.createElement('option');
+                    option.value = lot.id;
+                    option.textContent = lot.name;
+                    select.appendChild(option);
+                }
+            });
+            
+            // Set default selection to first parking lot
+            if (parkingLots.length > 0) {
+                const firstActiveLot = parkingLots.find(lot => lot.is_active);
+                if (firstActiveLot) {
+                    select.value = firstActiveLot.id;
+                    currentParkingLotId = firstActiveLot.id;
+                    onParkingLotChange();
+                }
+            }
+        }
+
+        // Handle parking lot selection change
+        function onParkingLotChange() {
+            const select = document.getElementById('parkingLotSelect');
+            currentParkingLotId = select.value;
+            
+            // Update panel titles
+            const selectedLot = parkingLots.find(lot => lot.id == currentParkingLotId);
+            if (selectedLot) {
+                document.getElementById('cameraPanelTitle').textContent = `${selectedLot.name} - Live Feed`;
+            }
+            
+            // Update images and statistics
+            updateImages();
+            updateStatistics();
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            if (!currentParkingLotId) return;
+            
+            const url = `/api/statistics?lot_id=${currentParkingLotId}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalSpaces').textContent = data.total_spaces;
+                    document.getElementById('emptySpaces').textContent = data.empty_spaces;
+                    document.getElementById('occupiedSpaces').textContent = data.filled_spaces;
+                    
+                    // Calculate availability rate
+                    const availabilityRate = data.total_spaces > 0 
+                        ? Math.round((data.empty_spaces / data.total_spaces) * 100) 
+                        : 0;
+                    document.getElementById('availabilityRate').textContent = availabilityRate + '%';
+                    
+                    // Update availability bar
+                    const availabilityBar = document.getElementById('availabilityBar');
+                    const availabilityText = document.getElementById('availabilityText');
+                    availabilityBar.style.width = availabilityRate + '%';
+                    availabilityText.textContent = availabilityRate + '% Available';
+                    
+                    // Update last update time
+                    const lastUpdate = data.last_update || 'No data available';
+                    if (lastUpdate !== 'No data available') {
+                        const formattedTime = new Date(lastUpdate).toLocaleTimeString();
+                        document.getElementById('lastUpdate').textContent = `Last updated: ${formattedTime}`;
+                    } else {
+                        document.getElementById('lastUpdate').textContent = 'No data available';
+                    }
+                    
+                    // Update zone breakdown
+                    updateZoneStatus(data.region_breakdown);
+                })
+                .catch(error => {
+                    console.error('Error fetching statistics:', error);
+                    document.getElementById('lastUpdate').textContent = 'Connection error';
+                });
+        }
+
+        // Update zone status
+        function updateZoneStatus(zones) {
+            const zoneList = document.getElementById('zoneList');
+            
+            if (!zones || Object.keys(zones).length === 0) {
+                zoneList.innerHTML = `
+                    <div style="text-align: center; color: #999; padding: 2rem;">
+                        No zone data available
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            for (const [zoneName, status] of Object.entries(zones)) {
+                const isEmpty = status === 1;
+                const statusText = isEmpty ? 'Available' : 'Occupied';
+                const badgeClass = isEmpty ? 'badge-available' : 'badge-occupied';
+                
+                html += `
+                    <div class="zone-item">
+                        <span class="zone-name">${zoneName}</span>
+                        <span class="zone-badge ${badgeClass}">${statusText}</span>
+                    </div>
+                `;
+            }
+            zoneList.innerHTML = html;
+        }
+
+        // Update images
+        function updateImages() {
+            if (!currentParkingLotId) return;
+            
+            const liveImg = document.getElementById('liveImage');
+            const livePlaceholder = document.getElementById('livePlaceholder');
+            const processedImg = document.getElementById('processedImage');
+            const processedPlaceholder = document.getElementById('processedPlaceholder');
+            
+            // Update live image
+            const liveUrl = `/api/live-image/${currentParkingLotId}`;
+            fetch(liveUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.image) {
+                        liveImg.onload = function() {
+                            livePlaceholder.style.display = 'none';
+                            liveImg.style.display = 'block';
+                        };
+                        liveImg.src = 'data:image/jpeg;base64,' + data.image;
+                    } else {
+                        livePlaceholder.innerHTML = `
+                            <div class="placeholder-icon">📹</div>
+                            <span>No image available</span>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching live image:', error);
+                    livePlaceholder.innerHTML = `
+                        <div class="placeholder-icon">❌</div>
+                        <span>Camera connection error</span>
+                    `;
+                });
+
+            // Update processed image
+            const processedUrl = `/api/processed-image/${currentParkingLotId}`;
+            fetch(processedUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.image) {
+                        processedImg.onload = function() {
+                            processedPlaceholder.style.display = 'none';
+                            processedImg.style.display = 'block';
+                        };
+                        processedImg.src = 'data:image/jpeg;base64,' + data.image;
+                    } else {
+                        processedPlaceholder.innerHTML = `
+                            <div class="placeholder-icon">🔍</div>
+                            <span>No processed image available</span>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching processed image:', error);
+                    processedPlaceholder.innerHTML = `
+                        <div class="placeholder-icon">❌</div>
+                        <span>Processing error</span>
+                    `;
+                });
+        }
+
+        // Logout function
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    // Call logout endpoint to clear session
+                    await fetch('/admin/logout', { method: 'GET' });
+                    // Redirect to login page
+                    window.location.href = '/login';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // Still redirect even if logout call fails
+                    window.location.href = '/login';
+                }
+            }
+        }
+
+        // Initialize application
+        async function initializeApp() {
+            await loadParkingLots();
+            if (currentParkingLotId) {
+                updateStatistics();
+                updateImages();
+            }
+        }
+
+        // Start application
+        initializeApp();
+
+        // Set up regular updates
+        setInterval(() => {
+            if (currentParkingLotId) {
+                updateStatistics();
+                updateImages();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

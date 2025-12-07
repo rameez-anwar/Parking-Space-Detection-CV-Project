@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calibration Tool - {{ parking_lot.name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1a202c;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 16px 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-success {
+            background: #38a169;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2f855a;
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            height: calc(100vh - 80px);
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 24px;
+        }
+
+        .control-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #2d3748;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .region-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 8px;
+        }
+
+        .region-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            margin-bottom: 4px;
+            background: #f7fafc;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .region-item:hover {
+            background: #edf2f7;
+        }
+
+        .region-name {
+            font-weight: 500;
+        }
+
+        .region-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 10px;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .video-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .video-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .video-container {
+            flex: 1;
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .video-feed {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .video-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .placeholder-icon {
+            width: 48px;
+            height: 48px;
+            background: #2d3748;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .placeholder-icon::before {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 12px solid #a0aec0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            margin-left: 3px;
+        }
+
+        .status-bar {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #2d3748;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: rgba(56, 161, 105, 0.1);
+            color: #38a169;
+            border: 1px solid rgba(56, 161, 105, 0.2);
+        }
+
+        .alert-error {
+            background: rgba(245, 101, 101, 0.1);
+            color: #e53e3e;
+            border: 1px solid rgba(245, 101, 101, 0.2);
+        }
+
+        .alert-info {
+            background: rgba(66, 153, 225, 0.1);
+            color: #4299e1;
+            border: 1px solid rgba(66, 153, 225, 0.2);
+        }
+
+        .drawing-mode {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            color: #d69e2e;
+        }
+
+        canvas {
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body data-parking-lot-id="{{ parking_lot.id }}">
+    <header class="header">
+        <div class="header-content">
+            <h1>Calibration Tool - {{ parking_lot.name }}</h1>
+            <div class="header-actions">
+                <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">← Back to Admin Panel</a>
+                <button class="btn btn-success" onclick="saveRegions()">Save Regions</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="control-panel">
+            <div class="control-section">
+                <h3>Camera Controls</h3>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="captureFrame()">Capture Frame</button>
+                    <button class="btn btn-secondary" onclick="refreshFrame()">Refresh</button>
+                </div>
+                <div class="form-group">
+                    <label>Camera URL</label>
+                    <input type="text" id="cameraUrl" value="{{ parking_lot.camera_url }}" readonly>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Region Drawing</h3>
+                <div class="form-group">
+                    <label for="regionName">Region Name</label>
+                    <input type="text" id="regionName" placeholder="e.g., parking_space_1">
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="startDrawing()" id="startDrawBtn">Start Drawing</button>
+                    <button class="btn btn-secondary" onclick="stopDrawing()" id="stopDrawBtn" disabled>Stop Drawing</button>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="clearCurrentRegion()">Clear Current</button>
+                    <button class="btn btn-secondary" onclick="undoLastPoint()">Undo Point</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Regions</h3>
+                <div class="region-list" id="regionList">
+                    <div style="text-align: center; color: #a0aec0; padding: 20px;">
+                        No regions defined
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="clearAllRegions()">Clear All</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Status</h3>
+                <div class="status-bar" id="statusBar">Ready</div>
+            </div>
+        </div>
+
+        <div class="video-panel">
+            <div class="video-header">
+                <div class="video-title">Camera Feed</div>
+                <div id="drawingIndicator" class="alert alert-info" style="display: none; margin: 0; padding: 8px 12px;">
+                    Drawing Mode Active
+                </div>
+            </div>
+            <div class="video-container" id="videoContainer">
+                <div class="video-placeholder">
+                    <div class="placeholder-icon"></div>
+                    <span>Click "Capture Frame" to start</span>
+                </div>
+                <canvas id="videoCanvas" style="display: none;" width="800" height="600"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentFrame = null;
+        let currentImage = null;
+        let currentRegion = [];
+        let currentRegionName = '';
+        let regions = {};
+        let drawing = false;
+        let canvas, ctx;
+        let scaleFactor = 1.0;
+        let offsetX = 0, offsetY = 0;
+
+        // Initialize canvas
+        function initCanvas() {
+            canvas = document.getElementById('videoCanvas');
+            ctx = canvas.getContext('2d');
+            
+            canvas.addEventListener('click', onCanvasClick);
+            canvas.addEventListener('mousemove', onCanvasMouseMove);
+        }
+
+        function updateStatus(message) {
+            document.getElementById('statusBar').textContent = message;
+        }
+
+        function updateDrawingIndicator() {
+            const indicator = document.getElementById('drawingIndicator');
+            if (drawing) {
+                indicator.style.display = 'block';
+                indicator.className = 'alert drawing-mode';
+                indicator.textContent = 'Drawing Mode Active - Click to add points';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        // Get parking lot ID from data attribute
+        const parkingLotId = document.body.dataset.parkingLotId;
+
+        async function captureFrame() {
+            try {
+                updateStatus('Capturing frame...');
+                
+                const response = await fetch(`/admin/api/capture-frame/${parkingLotId}`);
+                const data = await response.json();
+                
+                if (data.success && data.image) {
+                    currentImage = new Image();
+                    currentImage.onload = function() {
+                        displayImage();
+                        updateStatus('Frame captured successfully');
+                    };
+                    currentImage.src = 'data:image/jpeg;base64,' + data.image;
+                } else {
+                    // Fallback: create a placeholder image
+                    createPlaceholderImage();
+                    updateStatus('Camera not available, using placeholder');
+                }
+            } catch (error) {
+                console.error('Error capturing frame:', error);
+                createPlaceholderImage();
+                updateStatus('Error capturing frame, using placeholder');
+            }
+        }
+
+        function createPlaceholderImage() {
+            // Create a placeholder image for demonstration
+            const placeholder = document.createElement('canvas');
+            placeholder.width = 800;
+            placeholder.height = 600;
+            const pCtx = placeholder.getContext('2d');
+            
+            // Draw a simple parking lot representation
+            pCtx.fillStyle = '#2d3748';
+            pCtx.fillRect(0, 0, 800, 600);
+            
+            // Draw parking spaces
+            pCtx.fillStyle = '#4a5568';
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 6; j++) {
+                    pCtx.fillRect(50 + j * 120, 50 + i * 120, 100, 80);
+                }
+            }
+            
+            // Add text
+            pCtx.fillStyle = '#a0aec0';
+            pCtx.font = '24px Arial';
+            pCtx.textAlign = 'center';
+            pCtx.fillText('Parking Lot Calibration', 400, 300);
+            pCtx.font = '16px Arial';
+            pCtx.fillText('Draw regions around parking spaces', 400, 330);
+            
+            currentImage = placeholder;
+            displayImage();
+        }
+
+        function displayImage() {
+            if (!currentImage) return;
+            
+            const container = document.getElementById('videoContainer');
+            const placeholder = container.querySelector('.video-placeholder');
+            
+            // Calculate scaling to fit container
+            const containerRect = container.getBoundingClientRect();
+            const imgAspect = currentImage.width / currentImage.height;
+            const containerAspect = containerRect.width / containerRect.height;
+            
+            if (imgAspect > containerAspect) {
+                scaleFactor = containerRect.width / currentImage.width;
+            } else {
+                scaleFactor = containerRect.height / currentImage.height;
+            }
+            
+            const displayWidth = currentImage.width * scaleFactor;
+            const displayHeight = currentImage.height * scaleFactor;
+            
+            // Center the image
+            offsetX = (containerRect.width - displayWidth) / 2;
+            offsetY = (containerRect.height - displayHeight) / 2;
+            
+            // Set canvas size and position
+            canvas.width = displayWidth;
+            canvas.height = displayHeight;
+            canvas.style.width = displayWidth + 'px';
+            canvas.style.height = displayHeight + 'px';
+            canvas.style.left = offsetX + 'px';
+            canvas.style.top = offsetY + 'px';
+            canvas.style.position = 'absolute';
+            
+            // Hide placeholder and show canvas
+            placeholder.style.display = 'none';
+            canvas.style.display = 'block';
+            
+            // Draw the image
+            ctx.drawImage(currentImage, 0, 0, displayWidth, displayHeight);
+            
+            // Draw existing regions
+            drawRegions();
+            
+            // Draw current region being drawn
+            if (currentRegion.length > 0) {
+                drawCurrentRegion();
+            }
+        }
+
+        function drawRegions() {
+            for (const [regionName, points] of Object.entries(regions)) {
+                if (points.length < 2) continue;
+                
+                ctx.strokeStyle = '#38a169';
+                ctx.fillStyle = 'rgba(56, 161, 105, 0.2)';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                
+                // Draw points
+                ctx.fillStyle = '#38a169';
+                for (const point of points) {
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+                
+                // Draw label
+                if (points.length > 0) {
+                    const centerX = points.reduce((sum, p) => sum + p.x, 0) / points.length;
+                    const centerY = points.reduce((sum, p) => sum + p.y, 0) / points.length;
+                    
+                    ctx.fillStyle = '#38a169';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(regionName, centerX, centerY);
+                }
+            }
+        }
+
+        function drawCurrentRegion() {
+            if (currentRegion.length < 2) return;
+            
+            ctx.strokeStyle = '#4299e1';
+            ctx.fillStyle = 'rgba(66, 153, 225, 0.2)';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(currentRegion[0].x, currentRegion[0].y);
+            for (let i = 1; i < currentRegion.length; i++) {
+                ctx.lineTo(currentRegion[i].x, currentRegion[i].y);
+            }
+            ctx.stroke();
+            
+            // Draw points
+            ctx.fillStyle = '#4299e1';
+            for (const point of currentRegion) {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        function onCanvasClick(event) {
+            if (!drawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            currentRegion.push({ x, y });
+            updateStatus(`Added point (${Math.round(x)}, ${Math.round(y)}) - Total: ${currentRegion.length}`);
+            
+            // Redraw
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+            drawRegions();
+            drawCurrentRegion();
+        }
+
+        function onCanvasMouseMove(event) {
+            if (!drawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            // Update cursor position in status
+            updateStatus(`Drawing mode - Mouse: (${Math.round(x)}, ${Math.round(y)})`);
+        }
+
+        function startDrawing() {
+            const regionName = document.getElementById('regionName').value.trim();
+            if (!regionName) {
+                alert('Please enter a region name');
+                return;
+            }
+            
+            if (!currentImage) {
+                alert('Please capture a frame first');
+                return;
+            }
+            
+            currentRegionName = regionName;
+            currentRegion = [];
+            drawing = true;
+            
+            document.getElementById('startDrawBtn').disabled = true;
+            document.getElementById('stopDrawBtn').disabled = false;
+            
+            updateDrawingIndicator();
+            updateStatus(`Drawing region: ${regionName} - Click to add points`);
+        }
+
+        function stopDrawing() {
+            if (!drawing) return;
+            
+            if (currentRegion.length < 3) {
+                alert('Region must have at least 3 points');
+                return;
+            }
+            
+            regions[currentRegionName] = [...currentRegion];
+            currentRegion = [];
+            currentRegionName = '';
+            drawing = false;
+            
+            document.getElementById('startDrawBtn').disabled = false;
+            document.getElementById('stopDrawBtn').disabled = true;
+            
+            updateDrawingIndicator();
+            updateStatus(`Region "${currentRegionName}" saved with ${regions[currentRegionName].length} points`);
+            
+            // Update region list
+            updateRegionList();
+            
+            // Redraw
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+            drawRegions();
+        }
+
+        function clearCurrentRegion() {
+            currentRegion = [];
+            updateStatus('Current region cleared');
+            
+            if (currentImage) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+                drawRegions();
+            }
+        }
+
+        function undoLastPoint() {
+            if (currentRegion.length > 0) {
+                currentRegion.pop();
+                updateStatus(`Removed last point - Remaining: ${currentRegion.length}`);
+                
+                if (currentImage) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+                    drawRegions();
+                    drawCurrentRegion();
+                }
+            } else {
+                updateStatus('No points to remove');
+            }
+        }
+
+        function updateRegionList() {
+            const regionList = document.getElementById('regionList');
+            
+            if (Object.keys(regions).length === 0) {
+                regionList.innerHTML = '<div style="text-align: center; color: #a0aec0; padding: 20px;">No regions defined</div>';
+                return;
+            }
+            
+            let html = '';
+            for (const [name, points] of Object.entries(regions)) {
+                html += `
+                    <div class="region-item">
+                        <span class="region-name">${name}</span>
+                        <div class="region-actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteRegion('${name}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }
+            regionList.innerHTML = html;
+        }
+
+        function deleteRegion(name) {
+            if (confirm(`Delete region "${name}"?`)) {
+                delete regions[name];
+                updateRegionList();
+                updateStatus(`Region "${name}" deleted`);
+                
+                if (currentImage) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+                    drawRegions();
+                }
+            }
+        }
+
+        function clearAllRegions() {
+            if (Object.keys(regions).length === 0) {
+                updateStatus('No regions to clear');
+                return;
+            }
+            
+            if (confirm('Clear all regions?')) {
+                regions = {};
+                updateRegionList();
+                updateStatus('All regions cleared');
+                
+                if (currentImage) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+                }
+            }
+        }
+
+        function refreshFrame() {
+            if (currentImage) {
+                displayImage();
+                updateStatus('Frame refreshed');
+            } else {
+                updateStatus('No frame to refresh');
+            }
+        }
+
+        async function saveRegions() {
+            if (Object.keys(regions).length === 0) {
+                alert('No regions to save');
+                return;
+            }
+            
+            try {
+                updateStatus('Saving regions...');
+                
+                // Convert regions to the format expected by the backend
+                const regionsData = {};
+                for (const [name, points] of Object.entries(regions)) {
+                    regionsData[name] = points.map(p => [p.x / scaleFactor, p.y / scaleFactor]);
+                }
+                
+                const response = await fetch(`/admin/api/save-regions/${parkingLotId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ regions: regionsData })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error saving regions: ' + data.error);
+                    updateStatus('Error saving regions');
+                } else {
+                    alert('Regions saved successfully!');
+                    updateStatus('Regions saved successfully');
+                }
+            } catch (error) {
+                console.error('Error saving regions:', error);
+                alert('Error saving regions: ' + error);
+                updateStatus('Error saving regions');
+            }
+        }
+
+        // Initialize
+        initCanvas();
+        updateStatus('Ready - Click "Capture Frame" to start');
+    </script>
+</body>
+</html>

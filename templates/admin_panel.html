@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Parking Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1a202c;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 16px 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #4299e1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .parking-lots-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .parking-lots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .parking-lot-card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .parking-lot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .lot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .lot-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .lot-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-active {
+            background: rgba(56, 161, 105, 0.1);
+            color: #38a169;
+        }
+
+        .status-inactive {
+            background: rgba(229, 62, 62, 0.1);
+            color: #e53e3e;
+        }
+
+        .lot-info {
+            margin-bottom: 16px;
+        }
+
+        .lot-info p {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .lot-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .lot-stat {
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .lot-stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .lot-stat-label {
+            font-size: 10px;
+            color: #718096;
+            text-transform: uppercase;
+        }
+
+        .lot-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #2d3748;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: rgba(56, 161, 105, 0.1);
+            color: #38a169;
+            border: 1px solid rgba(56, 161, 105, 0.2);
+        }
+
+        .alert-error {
+            background: rgba(245, 101, 101, 0.1);
+            color: #e53e3e;
+            border: 1px solid rgba(245, 101, 101, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>Admin Panel</h1>
+            <div class="header-actions">
+                <a href="/dashboard" class="btn btn-secondary">View Dashboard</a>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Parking Lots</h3>
+                <div class="stat-value">{{ parking_lots|length }}</div>
+                <div class="stat-label">Active Lots</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Spaces</h3>
+                <div class="stat-value" id="totalSpaces">0</div>
+                <div class="stat-label">Across All Lots</div>
+            </div>
+            <div class="stat-card">
+                <h3>Available Spaces</h3>
+                <div class="stat-value" id="availableSpaces">0</div>
+                <div class="stat-label">Currently Empty</div>
+            </div>
+            <div class="stat-card">
+                <h3>Occupied Spaces</h3>
+                <div class="stat-value" id="occupiedSpaces">0</div>
+                <div class="stat-label">Currently Filled</div>
+            </div>
+        </div>
+
+        <div class="parking-lots-section">
+            <div class="section-header">
+                <h2 class="section-title">Parking Lots Management</h2>
+                <button class="btn btn-primary" onclick="openAddModal()">Add New Lot</button>
+            </div>
+
+            <div class="parking-lots-grid" id="parkingLotsGrid">
+                {% for lot in parking_lots %}
+                <div class="parking-lot-card" data-lot-id="{{ lot.id }}">
+                    <div class="lot-header">
+                        <div class="lot-name">{{ lot.name }}</div>
+                        <div class="lot-status {{ 'status-active' if lot.is_active else 'status-inactive' }}">
+                            {{ 'Active' if lot.is_active else 'Inactive' }}
+                        </div>
+                    </div>
+                    
+                    <div class="lot-info">
+                        <p><strong>Camera URL:</strong> {{ lot.camera_url }}</p>
+                        <p><strong>Regions File:</strong> {{ lot.regions_file or 'Not configured' }}</p>
+                        <p><strong>Created:</strong> {{ lot.created_at }}</p>
+                    </div>
+
+                    <div class="lot-stats">
+                        <div class="lot-stat">
+                            <div class="lot-stat-value" id="total-{{ lot.id }}">0</div>
+                            <div class="lot-stat-label">Total</div>
+                        </div>
+                        <div class="lot-stat">
+                            <div class="lot-stat-value" id="empty-{{ lot.id }}">0</div>
+                            <div class="lot-stat-label">Empty</div>
+                        </div>
+                        <div class="lot-stat">
+                            <div class="lot-stat-value" id="filled-{{ lot.id }}">0</div>
+                            <div class="lot-stat-label">Filled</div>
+                        </div>
+                    </div>
+
+                    <div class="lot-actions">
+                        <a href="{{ url_for('admin_calibration', lot_id=lot.id) }}" class="btn btn-primary btn-sm">Calibrate</a>
+                        <button class="btn btn-secondary btn-sm edit-lot-btn" 
+                                data-id="{{ lot.id }}" 
+                                data-name="{{ lot.name }}" 
+                                data-camera-url="{{ lot.camera_url }}" 
+                                data-regions-file="{{ lot.regions_file or '' }}" 
+                                data-is-active="{{ lot.is_active|lower }}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-lot-btn" 
+                                data-id="{{ lot.id }}" 
+                                data-name="{{ lot.name }}">Delete</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Modal -->
+    <div id="lotModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add Parking Lot</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="lotForm">
+                <div class="form-group">
+                    <label for="lotName">Parking Lot Name</label>
+                    <input type="text" id="lotName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="cameraUrl">Camera URL</label>
+                    <input type="url" id="cameraUrl" name="camera_url" required>
+                </div>
+                <div class="form-group">
+                    <label for="regionsFile">Regions File (optional)</label>
+                    <input type="text" id="regionsFile" name="regions_file" placeholder="e.g., regions_lot1.json">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isActive" name="is_active" checked> Active
+                    </label>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let editingLotId = null;
+
+        function openAddModal() {
+            editingLotId = null;
+            document.getElementById('modalTitle').textContent = 'Add Parking Lot';
+            document.getElementById('lotForm').reset();
+            document.getElementById('isActive').checked = true;
+            document.getElementById('lotModal').style.display = 'block';
+        }
+
+        function editLot(id, name, cameraUrl, regionsFile, isActive) {
+            editingLotId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Parking Lot';
+            document.getElementById('lotName').value = name;
+            document.getElementById('cameraUrl').value = cameraUrl;
+            document.getElementById('regionsFile').value = regionsFile;
+            document.getElementById('isActive').checked = isActive;
+            document.getElementById('lotModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('lotModal').style.display = 'none';
+        }
+
+        function deleteLot(id, name) {
+            if (confirm(`Are you sure you want to delete "${name}"?`)) {
+                fetch(`/admin/api/parking-lots/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                    } else {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error);
+                });
+            }
+        }
+
+        // Add event listeners for edit and delete buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Edit button event listeners
+            document.querySelectorAll('.edit-lot-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    const name = this.dataset.name;
+                    const cameraUrl = this.dataset.cameraUrl;
+                    const regionsFile = this.dataset.regionsFile;
+                    const isActive = this.dataset.isActive === 'true';
+                    editLot(id, name, cameraUrl, regionsFile, isActive);
+                });
+            });
+
+            // Delete button event listeners
+            document.querySelectorAll('.delete-lot-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    const name = this.dataset.name;
+                    deleteLot(id, name);
+                });
+            });
+        });
+
+        document.getElementById('lotForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                name: formData.get('name'),
+                camera_url: formData.get('camera_url'),
+                regions_file: formData.get('regions_file') || null,
+                is_active: formData.get('is_active') === 'on'
+            };
+
+            const url = editingLotId 
+                ? `/admin/api/parking-lots/${editingLotId}`
+                : '/admin/api/parking-lots';
+            const method = editingLotId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    closeModal();
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        });
+
+        // Update statistics
+        function updateStatistics() {
+            fetch('/api/statistics')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalSpaces').textContent = data.total_spaces;
+                    document.getElementById('availableSpaces').textContent = data.empty_spaces;
+                    document.getElementById('occupiedSpaces').textContent = data.filled_spaces;
+
+                    // Update individual lot statistics
+                    if (data.parking_lots) {
+                        data.parking_lots.forEach(lot => {
+                            const totalEl = document.getElementById(`total-${lot.id}`);
+                            const emptyEl = document.getElementById(`empty-${lot.id}`);
+                            const filledEl = document.getElementById(`filled-${lot.id}`);
+                            
+                            if (totalEl) totalEl.textContent = lot.total_spaces;
+                            if (emptyEl) emptyEl.textContent = lot.empty_spaces;
+                            if (filledEl) filledEl.textContent = lot.filled_spaces;
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching statistics:', error);
+                });
+        }
+
+        // Update statistics every 5 seconds
+        updateStatistics();
+        setInterval(updateStatistics, 5000);
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('lotModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
