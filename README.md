@@ -3,7 +3,7 @@
 
 A real-time parking space detection system using computer vision and deep learning. This system uses YOLO (You Only Look Once) segmentation model to detect vehicles in parking lots and provides a web-based interface for monitoring parking availability.
 
-image.png
+<img width="1635" height="637" alt="image" src="https://github.com/user-attachments/assets/567efb5a-7391-4c52-bc63-57a75f82d6b3" />
 
 ## Features
 
