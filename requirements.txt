@@ -1,17 +1,9 @@
-# ParkingSpace Detection System Requirements
-# Optimized for GitHub deployment to Azure App Service
-# Install with: pip install -r requirements.txt
 
-# Use CPU-only PyTorch wheels to avoid CUDA on Azure App Service
---extra-index-url https://download.pytorch.org/whl/cpu
-
-# Core computer vision and ML libraries
-# Headless OpenCV avoids GUI/X11 dependencies on servers
 opencv-python-headless==4.8.1.78
 numpy==1.24.3
 ultralytics==8.0.196
-# CPU-only wheel; smaller and compatible with Azure build
-torch==2.0.1+cpu
+
+torch==2.0.1
 
 # HTTP requests and image processing for live feeds
 requests==2.31.0
@@ -39,7 +31,7 @@ structlog==23.1.0
 # Health check endpoint for Azure monitoring
 flask-healthz==1.0.1
 
-# Additional production dependencies
+# Additional production dependencies (usually installed with Flask, but specified for clarity)
 Werkzeug==2.3.7
 Jinja2==3.1.2
 MarkupSafe==2.1.3
